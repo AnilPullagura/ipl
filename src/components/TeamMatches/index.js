@@ -1,4 +1,5 @@
 // Write your code here
+import {PieChart, Pie, Cell, Legend, Tooltip} from 'recharts'
 import {Component} from 'react'
 import Loader from 'react-loader-spinner'
 import {Link} from 'react-router-dom'
@@ -34,6 +35,7 @@ class TeamMatches extends Component {
       latestMatchDetails: latestMatches.latest_match_details,
       recentMatch: latestMatches.recent_matches,
     }
+
     this.setState({
       matchList: {
         teamBannerUrl: updateData.teamBannerUrl,
@@ -48,6 +50,32 @@ class TeamMatches extends Component {
     const {matchList, isFinish} = this.state
     const {teamBannerUrl, latestMatchDetails, recentMatch} = matchList
     const competingTeam = latestMatchDetails.competing_team
+    const stats = {
+      won: 0,
+      lost: 0,
+      draw: 0,
+    }
+
+    recentMatch.forEach(each => {
+      switch (each.match_status) {
+        case 'Won':
+          stats.won += 1
+          break
+        case 'Lost':
+          stats.lost += 1
+          break
+        case 'Draw':
+          stats.draw += 1
+          break
+        default:
+          break
+      }
+    })
+    const statsData = [
+      {name: 'Won', value: stats.won},
+      {name: 'Lost', value: stats.lost},
+      {name: 'Draw', value: stats.draw},
+    ]
     return (
       <div className="matches-container">
         <Link className="arrow-icon" to="/">
@@ -72,6 +100,23 @@ class TeamMatches extends Component {
               <p>Latest Match</p>
               <LatestMatch details={latestMatchDetails} />
             </div>
+            <PieChart width={300} height={300}>
+              <Pie
+                cx="50%"
+                cy="50%"
+                outerRadius={80}
+                fill="#8884d8"
+                data={statsData}
+                dataKey="value"
+              >
+                <Cell name="Won" fill="#2d6a4f" />
+                <Cell name="Lost" fill="#ae2012" />
+                <Cell name="Draw" fill="#a3a3a3" />
+              </Pie>
+              <Tooltip />
+              <Legend height={36} />
+            </PieChart>
+
             <ul className="recent-ul-list">
               {recentMatch.map(each => (
                 <MatchCard eachItem={each} key={each.id} />
